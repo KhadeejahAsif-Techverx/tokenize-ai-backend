@@ -1,0 +1,119 @@
+import { User } from '@modules/user/entities/user.entity';
+import { UserService } from '@modules/user/services/user.service';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+
+import { JwtService } from '@nestjs/jwt';
+import { LoginDto } from '@requestable-dto/auth/login.dto';
+import { CreateUserDto } from '@requestable-dto/user/create-user.dto';
+import { UserCredentialService } from './user-credential.service';
+import { ResetPasswordDto } from '@requestable-dto/auth/reset-password.dto';
+
+export interface JwtPayload {
+  sub: string;
+  email: string;
+}
+
+@Injectable()
+export class AuthService {
+  constructor(
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService,
+    private readonly userCredentialService: UserCredentialService,
+  ) {}
+
+  /**
+   * Validate JWT token and return user
+   * @param token - JWT token
+   * @returns Promise<User> - The authenticated user
+   * @throws UnauthorizedException if token is invalid
+   */
+  async validateToken(token: string): Promise<User> {
+    try {
+      const payload = this.jwtService.verify<JwtPayload>(token);
+      const user = await this.userService.findById(payload.sub);
+
+      if (!user.isActive) {
+        throw new UnauthorizedException('User account is inactive');
+      }
+
+      return user;
+    } catch (error) {
+      throw new UnauthorizedException('Invalid token');
+    }
+  }
+
+  async register(payload: CreateUserDto) {
+    return await this.userService.create(payload);
+  }
+
+  async login(payload: LoginDto): Promise<any> {
+    const { email, password } = payload;
+
+    // Find user by email
+    const user = await this.userService.findByEmail(email);
+
+    if (!user || !user.password) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    if (user.isActive === false) {
+      throw new UnauthorizedException(
+        'User account is inactive, please contact admin to activate your account',
+      );
+    }
+
+    // Validate password
+    const isPasswordValid = await this.userService.validatePassword(
+      password,
+      user.password,
+    );
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    // Generate JWT token
+    const jwtPayload: JwtPayload = {
+      sub: user.id,
+      email: user.email,
+    };
+
+    const accessToken = this.jwtService.sign(jwtPayload);
+
+    return { user, accessToken };
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.userService.findByEmail(email);
+
+    if (!user) {
+      throw new UnauthorizedException('Email not found');
+    }
+
+    return await this.userCredentialService.fortgotPassword(user.id);
+  }
+
+  async resetPassword(payload: ResetPasswordDto) {
+    const { token, password } = payload;
+
+    const userCredentials = await this.userCredentialService.findByToken(token);
+
+    if (
+      !userCredentials ||
+      userCredentials.isUsed ||
+      userCredentials.expiry < new Date()
+    ) {
+      throw new NotFoundException('Invalid or expired token');
+    }
+
+    await this.userCredentialService.markTokenAsUsed(userCredentials.id);
+
+    await this.userService.updatePassword(userCredentials.userId, password);
+
+    return true;
+  }
+}
