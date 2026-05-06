@@ -8,14 +8,14 @@ import { UserModule } from '@modules/user/user.module';
 import AuditSubscriber from '@interceptors/audit.subscriber';
 import AuthModule from '@modules/auth/auth.module';
 
-// import { classes } from '@automapper/classes';
-// import { AutomapperModule } from '@automapper/nestjs';
+import { classes } from '@automapper/classes';
+import { AutomapperModule } from '@automapper/nestjs';
 
 @Module({
   imports: [
-    // AutomapperModule.forRoot({
-    //   strategyInitializer: classes(),
-    // }),
+    AutomapperModule.forRoot({
+      strategyInitializer: classes(),
+    }),
 
     ConfigModule.forRoot({
       isGlobal: true,

@@ -4,15 +4,28 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserProfile } from '../entities/user-profile.entity';
 import { SetUserProfileDto } from '@requestable-dto/user/profile/set-user-profilt.dto';
 import { UserService } from './user.service';
+import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
+import { createMap, Mapper } from '@automapper/core';
+import { UserProfileResponseDto } from '@transferable-dto/user/profile/user-profile.response.dto';
 
 @Injectable()
-export class UserProfileService {
+export class UserProfileService extends AutomapperProfile {
   constructor(
+    @InjectMapper() readonly mapper: Mapper,
+
     @InjectRepository(UserProfile)
     private readonly userProfile: Repository<UserProfile>,
 
     private readonly userService: UserService,
-  ) {}
+  ) {
+    super(mapper);
+  }
+
+  override get profile() {
+    return (mapper: Mapper) => {
+      createMap(mapper, UserProfile, UserProfileResponseDto);
+    };
+  }
 
   async setProfile(payload: SetUserProfileDto, userId: string) {
     const user = await this.userService.findById(userId);
@@ -50,6 +63,13 @@ export class UserProfileService {
       );
     }
 
-    return profile;
+    // Order: (source, SourceClass, DestinationClass)
+    const mappedUser = this.mapper.map(
+      profile,
+      UserProfile,
+      UserProfileResponseDto,
+    );
+
+    return mappedUser;
   }
 }

@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "resolvePackageJsonExports": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
     "esModuleInterop": true,
     "isolatedModules": true,
     "declaration": true,
@@ -25,6 +24,7 @@
       "@interceptors/*": ["./libs/interceptors/*"],
       "@base-classes/*": ["./libs/base-classes/*"],
       "@requestable-dto/*": ["./libs/building-block/dto/requestableDTOs/*"],
+      "@transferable-dto/*": ["./libs/building-block/dto/transferableDTOs/*"],
       "@modules/*": ["./src/modules/*"]
     }
   }

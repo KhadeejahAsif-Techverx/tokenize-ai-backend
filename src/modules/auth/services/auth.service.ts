@@ -11,6 +11,9 @@ import { LoginDto } from '@requestable-dto/auth/login.dto';
 import { CreateUserDto } from '@requestable-dto/user/create-user.dto';
 import { UserCredentialService } from './user-credential.service';
 import { ResetPasswordDto } from '@requestable-dto/auth/reset-password.dto';
+import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
+import { createMap, Mapper } from '@automapper/core';
+import { LoginResponseDto } from '@transferable-dto/auth/login.response.dto';
 
 export interface JwtPayload {
   sub: string;
@@ -18,12 +21,22 @@ export interface JwtPayload {
 }
 
 @Injectable()
-export class AuthService {
+export class AuthService extends AutomapperProfile {
   constructor(
+    @InjectMapper() readonly mapper: Mapper,
+
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly userCredentialService: UserCredentialService,
-  ) {}
+  ) {
+    super(mapper);
+  }
+
+  override get profile() {
+    return (mapper: Mapper) => {
+      createMap(mapper, User, LoginResponseDto);
+    };
+  }
 
   /**
    * Validate JWT token and return user
@@ -82,9 +95,12 @@ export class AuthService {
       email: user.email,
     };
 
+    // Order: (source, SourceClass, DestinationClass)
+    const mappedUser = this.mapper.map(user, User, LoginResponseDto);
+
     const accessToken = this.jwtService.sign(jwtPayload);
 
-    return { user, accessToken };
+    return { user: mappedUser, accessToken };
   }
 
   async forgotPassword(email: string) {

@@ -1,6 +1,7 @@
 import { Column, Entity, OneToOne } from 'typeorm';
 import { User } from './user.entity';
 import CustomBaseEntity from '@base-classes/base.entity';
+import { AutoMap } from '@automapper/classes';
 
 @Entity('user_profile')
 export class UserProfile extends CustomBaseEntity {
@@ -11,6 +12,7 @@ export class UserProfile extends CustomBaseEntity {
       from: (value: string) => value,
     },
   })
+  @AutoMap()
   firstName: string;
 
   @Column({
@@ -20,10 +22,12 @@ export class UserProfile extends CustomBaseEntity {
       from: (value: string) => value,
     },
   })
+  @AutoMap()
   lastName: string;
 
   /** Role ID for this user. */
   @Column({ type: 'uuid', default: null })
+  @AutoMap()
   userId: string;
 
   @OneToOne(() => User, (user) => user.profile)

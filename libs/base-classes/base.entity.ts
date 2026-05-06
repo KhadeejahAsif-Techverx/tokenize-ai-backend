@@ -1,3 +1,4 @@
+import { AutoMap } from '@automapper/classes';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   BaseEntity,
@@ -23,6 +24,7 @@ export default abstract class CustomBaseEntity extends BaseEntity {
     readOnly: true,
   })
   @PrimaryGeneratedColumn('uuid')
+  @AutoMap()
   id: string;
 
   /** Date and time when the entity was created (ISO 8601). */

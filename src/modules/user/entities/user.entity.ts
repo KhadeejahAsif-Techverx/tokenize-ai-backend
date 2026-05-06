@@ -2,6 +2,7 @@ import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import { UserProfile } from './user-profile.entity';
 import CustomBaseEntity from '@base-classes/base.entity';
 import { UserCredential } from '@modules/auth/entities/user-credential.entity';
+import { AutoMap } from '@automapper/classes';
 
 @Entity('users')
 export class User extends CustomBaseEntity {
@@ -14,6 +15,7 @@ export class User extends CustomBaseEntity {
       from: (value: string) => value,
     },
   })
+  @AutoMap()
   email: string;
 
   @Column({
