@@ -17,4 +17,20 @@ export class SetUserProfileDto {
   @IsString()
   @IsNotEmpty()
   lastName: string;
+
+  @ApiProperty({
+    description: 'Contact of the user',
+    example: '+92 317 4945496',
+  })
+  @IsString()
+  @IsNotEmpty()
+  contact: string;
+
+  @ApiProperty({
+    description: 'Country name of the user',
+    example: 'Pakistan',
+  })
+  @IsString()
+  @IsNotEmpty()
+  country: string;
 }

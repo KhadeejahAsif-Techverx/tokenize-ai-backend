@@ -38,11 +38,15 @@ export class UserProfileService extends AutomapperProfile {
       profile = this.userProfile.create({
         firstName: payload.firstName,
         lastName: payload.lastName,
+        contact: payload.contact,
+        country: payload.country,
         userId,
       });
     } else {
       profile.firstName = payload.firstName;
       profile.lastName = payload.lastName;
+      profile.contact = payload.contact;
+      profile.country = payload.country;
     }
 
     return await this.userProfile.save(profile);
