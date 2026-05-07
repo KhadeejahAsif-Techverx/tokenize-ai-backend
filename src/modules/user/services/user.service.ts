@@ -71,13 +71,19 @@ export class UserService extends AutomapperProfile {
     return bcrypt.compare(password, hashedPassword);
   }
 
-  async findById(id: string): Promise<User> {
+  async findById(id: string, loadRelations = false) {
     const user = await this.userRepository.findOne({
       where: { id },
+      relations: loadRelations ? ['profile'] : undefined,
     });
 
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    if (loadRelations) {
+      const mappedUser = this.mapper.map(user, User, UserResponseDto);
+      return mappedUser;
     }
 
     return user;

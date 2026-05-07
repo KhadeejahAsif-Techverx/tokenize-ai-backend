@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
@@ -17,6 +18,20 @@ import { BaseQueryDto } from '@base-classes/pagination/base-query.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Get(':userId')
+  @ApiOperation({
+    summary: 'Get user by ID',
+    description: 'Retrieves a user by their unique identifier',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'The ID of the user to retrieve',
+    required: true,
+  })
+  async findById(@Param('userId', new ParseUUIDPipe()) userId: string) {
+    return await this.userService.findById(userId, true);
+  }
+
   @Post('get-all')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -29,7 +44,6 @@ export class UserController {
   }
 
   @Patch(':userId/toggle-active')
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Toggle user active status',
     description: 'Activate or deactivate a user account',

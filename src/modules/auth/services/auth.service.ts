@@ -44,7 +44,7 @@ export class AuthService extends AutomapperProfile {
    * @returns Promise<User> - The authenticated user
    * @throws UnauthorizedException if token is invalid
    */
-  async validateToken(token: string): Promise<User> {
+  async validateToken(token: string) {
     try {
       const payload = this.jwtService.verify<JwtPayload>(token);
       const user = await this.userService.findById(payload.sub);
@@ -69,14 +69,8 @@ export class AuthService extends AutomapperProfile {
     // Find user by email
     const user = await this.userService.findByEmail(email);
 
-    if (!user || !user.password) {
+    if (!user) {
       throw new UnauthorizedException('Invalid email or password');
-    }
-
-    if (user.isActive === false) {
-      throw new UnauthorizedException(
-        'User account is inactive, please contact admin to activate your account',
-      );
     }
 
     // Validate password
@@ -87,6 +81,12 @@ export class AuthService extends AutomapperProfile {
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');
+    }
+
+    if (user.isActive === false) {
+      throw new UnauthorizedException(
+        'User account is inactive, please contact admin to activate your account',
+      );
     }
 
     // Generate JWT token

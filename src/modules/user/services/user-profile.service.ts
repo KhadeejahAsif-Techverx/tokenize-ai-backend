@@ -28,11 +28,7 @@ export class UserProfileService extends AutomapperProfile {
   }
 
   async setProfile(payload: SetUserProfileDto, userId: string) {
-    const user = await this.userService.findById(userId);
-
-    if (!user) {
-      throw new Error('User not found');
-    }
+    await this.userService.findById(userId);
 
     let profile = await this.userProfile.findOne({
       where: { user: { id: userId } },
