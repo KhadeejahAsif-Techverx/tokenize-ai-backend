@@ -3,6 +3,7 @@ import { UserProfile } from './user-profile.entity';
 import CustomBaseEntity from '@base-classes/base.entity';
 import { UserCredential } from '@modules/auth/entities/user-credential.entity';
 import { AutoMap } from '@automapper/classes';
+import { UserProfileResponseDto } from '@transferable-dto/user/profile/user-profile.response.dto';
 
 @Entity('users')
 export class User extends CustomBaseEntity {
@@ -28,7 +29,7 @@ export class User extends CustomBaseEntity {
     cascade: true,
     onDelete: 'CASCADE',
   })
-  @JoinColumn()
+  @AutoMap(() => UserProfileResponseDto)
   profile: UserProfile;
 
   @OneToOne(() => UserCredential, (credential) => credential.user, {
@@ -40,5 +41,10 @@ export class User extends CustomBaseEntity {
 
   /** Whether the user account is active. */
   @Column({ type: 'boolean', default: true })
+  @AutoMap()
   isActive: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @AutoMap()
+  emailVerified: boolean;
 }

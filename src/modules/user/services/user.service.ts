@@ -8,13 +8,45 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from '@requestable-dto/user/create-user.dto';
 import * as bcrypt from 'bcrypt';
+import { BaseQueryDto } from '@base-classes/pagination/base-query.dto';
+import { PageDto } from '@base-classes/pagination/page.dto';
+import { PageMetaDto } from '@base-classes/pagination/page-meta.dto';
+import { UserResponseDto } from '@transferable-dto/user/user.response.dto';
+import { createMap, forMember, mapFrom, Mapper } from '@automapper/core';
+import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
+import { UserProfile } from '../entities/user-profile.entity';
+import { UserProfileResponseDto } from '@transferable-dto/user/profile/user-profile.response.dto';
 
 @Injectable()
-export class UserService {
+export class UserService extends AutomapperProfile {
   constructor(
+    @InjectMapper() readonly mapper: Mapper,
+
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) {}
+  ) {
+    super(mapper);
+  }
+
+  override get profile() {
+    return (mapper: Mapper) => {
+      createMap(mapper, UserProfile, UserProfileResponseDto);
+
+      createMap(
+        mapper,
+        User,
+        UserResponseDto,
+        forMember(
+          (dest) => dest.profile,
+          mapFrom((s) =>
+            s.profile
+              ? mapper.map(s.profile, UserProfile, UserProfileResponseDto)
+              : null,
+          ),
+        ),
+      );
+    };
+  }
 
   /**
    * Hash a password
@@ -88,7 +120,70 @@ export class UserService {
     );
   }
 
-  async findAll() {
-    return { user: [] };
+  /**
+   * Get all vendors with optional filtering
+   */
+
+  async findAll(
+    pageOptionsDto: BaseQueryDto,
+  ): Promise<PageDto<UserResponseDto>> {
+    const { filters, skip, take } = pageOptionsDto;
+
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.profile', 'profile');
+
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (key === 'search') {
+          queryBuilder.andWhere(
+            `(LOWER(user.email) LIKE :search 
+            OR LOWER(profile.firstName) LIKE :search
+            OR LOWER(profile.lastName) LIKE :search)`,
+            {
+              search: `%${value.toString().toLowerCase()}%`,
+            },
+          );
+        } else {
+          queryBuilder.andWhere(`user.${key} = :${key}`, {
+            [key]: value,
+          });
+        }
+      });
+    }
+
+    // Step 1: count total with the same filters
+    const total = await queryBuilder.clone().getCount();
+
+    const users = await queryBuilder
+      .skip(skip)
+      .take(take)
+      .orderBy('user.createdAt', 'DESC')
+      .getMany();
+
+    const pageMetaDto = new PageMetaDto({
+      pageOptionsDto,
+      itemCount: total,
+    });
+
+    const mappedUsers = this.mapper.mapArray(users, User, UserResponseDto);
+
+    return new PageDto(mappedUsers, pageMetaDto);
+  }
+
+  async verifyEmail(email: string) {
+    return await this.userRepository.update(
+      { email: email.toLowerCase().trim() },
+      { emailVerified: true },
+    );
+  }
+
+  async toggleUserActiveStatus(userId: string) {
+    const user = await this.findById(userId);
+
+    return await this.userRepository.update(
+      { id: userId },
+      { isActive: !user.isActive },
+    );
   }
 }

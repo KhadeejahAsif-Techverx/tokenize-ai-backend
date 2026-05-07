@@ -22,6 +22,7 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "@interceptors/*": ["./libs/interceptors/*"],
+      "@enums/*": ["./libs/building-block/enums/*"],
       "@base-classes/*": ["./libs/base-classes/*"],
       "@requestable-dto/*": ["./libs/building-block/dto/requestableDTOs/*"],
       "@transferable-dto/*": ["./libs/building-block/dto/transferableDTOs/*"],

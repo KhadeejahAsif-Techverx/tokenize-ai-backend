@@ -1,6 +1,16 @@
-import { Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { UserService } from '../services/user.service';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { BaseQueryDto } from '@base-classes/pagination/base-query.dto';
 
 @ApiTags('User')
 @Controller('users')
@@ -14,7 +24,24 @@ export class UserController {
     description:
       'Returns a list of all users in the system with pagination and filtering options',
   })
-  async findAll() {
-    return await this.userService.findAll();
+  async findAll(@Body() payload: BaseQueryDto) {
+    return await this.userService.findAll(payload);
+  }
+
+  @Patch(':userId/toggle-active')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Toggle user active status',
+    description: 'Activate or deactivate a user account',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'The ID of the user whose active status is being toggled',
+    required: true,
+  })
+  async toggleUserActiveStatus(
+    @Param('userId', new ParseUUIDPipe()) userId: string,
+  ) {
+    return await this.userService.toggleUserActiveStatus(userId);
   }
 }

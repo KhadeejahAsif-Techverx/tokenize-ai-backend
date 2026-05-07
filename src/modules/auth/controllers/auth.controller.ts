@@ -52,7 +52,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Public()
   @ApiOperation({
-    summary: 'Forgot password',
+    summary: 'Forgot password initiation',
     description: 'Initiate the forgot password process for a user',
   })
   @ApiBody({
@@ -67,7 +67,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Public()
   @ApiOperation({
-    summary: 'Reset password',
+    summary: 'Reset password via token',
     description: 'Reset password using token and new password',
   })
   @ApiBody({
@@ -84,5 +84,28 @@ export class AuthController {
     }
 
     return { message: 'Password reset failed', success: false };
+  }
+
+  @Patch('verify-email')
+  @HttpCode(HttpStatus.OK)
+  @Public()
+  @ApiOperation({
+    summary: 'Verify email',
+    description: 'Verify user email address',
+  })
+  @ApiBody({
+    type: EmailDto,
+    description: 'Email verification payload',
+  })
+  async verifyEmail(
+    @Body() payload: EmailDto,
+  ): Promise<{ message: string; success: boolean }> {
+    const response = await this.authService.verifyEmail(payload.email);
+
+    if (response) {
+      return { message: 'Email verified successfully', success: true };
+    }
+
+    return { message: 'Email verification failed', success: false };
   }
 }

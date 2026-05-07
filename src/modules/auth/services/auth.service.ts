@@ -132,4 +132,8 @@ export class AuthService extends AutomapperProfile {
 
     return true;
   }
+
+  async verifyEmail(email: string) {
+    return await this.userService.verifyEmail(email);
+  }
 }

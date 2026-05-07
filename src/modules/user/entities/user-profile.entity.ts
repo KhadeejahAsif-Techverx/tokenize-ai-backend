@@ -1,4 +1,4 @@
-import { Column, Entity, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import { User } from './user.entity';
 import CustomBaseEntity from '@base-classes/base.entity';
 import { AutoMap } from '@automapper/classes';
@@ -31,5 +31,6 @@ export class UserProfile extends CustomBaseEntity {
   userId: string;
 
   @OneToOne(() => User, (user) => user.profile)
+  @JoinColumn()
   user: User;
 }

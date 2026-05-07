@@ -18,7 +18,7 @@ async function bootstrap() {
   );
 
   // Set global API prefix
-  app.setGlobalPrefix('edge/v1');
+  app.setGlobalPrefix('api/v1');
 
   // Enable CORS for all origins
   app.enableCors({
