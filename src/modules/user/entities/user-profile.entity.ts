@@ -8,7 +8,7 @@ export class UserProfile extends CustomBaseEntity {
   @Column({
     type: 'varchar',
     transformer: {
-      to: (value: string) => value?.toLowerCase(),
+      to: (value: string) => value?.trim()?.toLowerCase(),
       from: (value: string) => value,
     },
   })
@@ -18,12 +18,20 @@ export class UserProfile extends CustomBaseEntity {
   @Column({
     type: 'varchar',
     transformer: {
-      to: (value: string) => value?.toLowerCase(),
+      to: (value: string) => value?.trim()?.toLowerCase(),
       from: (value: string) => value,
     },
   })
   @AutoMap()
   lastName: string;
+
+  @Column({ type: 'varchar', nullable: true, length: 40, default: '' })
+  @AutoMap()
+  contact: string;
+
+  @Column({ type: 'varchar', nullable: true, length: 20, default: null })
+  @AutoMap()
+  country: string | null;
 
   /** Role ID for this user. */
   @Column({ type: 'uuid', default: null })
@@ -33,4 +41,13 @@ export class UserProfile extends CustomBaseEntity {
   @OneToOne(() => User, (user) => user.profile)
   @JoinColumn()
   user: User;
+
+  // only filled for company-role users
+  @Column({ type: 'text', nullable: true, default: '' })
+  @AutoMap()
+  companyName: string;
+
+  @Column({ type: 'varchar', nullable: true, default: '' })
+  @AutoMap()
+  companyRegNo: string;
 }

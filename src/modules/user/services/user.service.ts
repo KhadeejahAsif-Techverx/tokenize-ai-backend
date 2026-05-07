@@ -127,7 +127,7 @@ export class UserService extends AutomapperProfile {
   }
 
   /**
-   * Get all vendors with optional filtering
+   * Get all with optional filtering
    */
 
   async findAll(

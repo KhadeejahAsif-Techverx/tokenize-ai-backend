@@ -29,7 +29,6 @@ export class UserProfileController {
   constructor(private readonly userProfileService: UserProfileService) {}
 
   @Post('set-profile')
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Set user profile',
     description:

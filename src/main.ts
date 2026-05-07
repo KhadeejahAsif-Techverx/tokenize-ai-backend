@@ -40,9 +40,10 @@ async function bootstrap() {
       description: 'Enter JWT token',
       in: 'header',
     })
-    .addTag('Authentication', 'Authentication endpoints')
     .addTag('User', 'User management endpoints')
+    .addTag('Patent', 'Patent management endpoints')
     .addTag('User Profile', 'User profile management endpoints')
+    .addTag('Authentication', 'Authentication endpoints')
 
     .build();
 

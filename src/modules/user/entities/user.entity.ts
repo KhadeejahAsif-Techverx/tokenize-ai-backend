@@ -4,6 +4,7 @@ import CustomBaseEntity from '@base-classes/base.entity';
 import { UserCredential } from '@modules/auth/entities/user-credential.entity';
 import { AutoMap } from '@automapper/classes';
 import { UserProfileResponseDto } from '@transferable-dto/user/profile/user-profile.response.dto';
+import { UserKYCStatusEnum } from '@enums/user/user.enum';
 
 @Entity('users')
 export class User extends CustomBaseEntity {
@@ -12,7 +13,7 @@ export class User extends CustomBaseEntity {
     unique: true,
     length: 320,
     transformer: {
-      to: (value: string) => value?.toLowerCase(),
+      to: (value: string) => value?.trim()?.toLowerCase(),
       from: (value: string) => value,
     },
   })
@@ -23,6 +24,14 @@ export class User extends CustomBaseEntity {
     type: 'varchar',
   })
   password: string;
+
+  @Column({
+    type: 'enum',
+    enum: UserKYCStatusEnum,
+    default: UserKYCStatusEnum.PENDING,
+  })
+  @AutoMap()
+  kycStatus: UserKYCStatusEnum;
 
   @OneToOne(() => UserProfile, (profile) => profile.user, {
     eager: false,

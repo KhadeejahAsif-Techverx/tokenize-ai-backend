@@ -5,11 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import appConfig from '../config/index';
 import { UserModule } from '@modules/user/user.module';
-import AuditSubscriber from '@interceptors/audit.subscriber';
 import AuthModule from '@modules/auth/auth.module';
 
 import { classes } from '@automapper/classes';
 import { AutomapperModule } from '@automapper/nestjs';
+import { PatentModule } from '@modules/patent/patent.module';
 
 @Module({
   imports: [
@@ -40,8 +40,9 @@ import { AutomapperModule } from '@automapper/nestjs';
 
     UserModule,
     AuthModule,
+    PatentModule,
   ],
   controllers: [],
-  providers: [AuditSubscriber],
+  providers: [],
 })
 export class AppModule {}
