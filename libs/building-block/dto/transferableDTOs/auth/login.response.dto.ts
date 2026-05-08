@@ -1,4 +1,5 @@
 import { AutoMap } from '@automapper/classes';
+import { UserProfileResponseDto } from '@transferable-dto/user/profile/user-profile.response.dto';
 
 export class LoginResponseDto {
   @AutoMap()
@@ -6,4 +7,7 @@ export class LoginResponseDto {
 
   @AutoMap()
   email: string;
+
+  @AutoMap(() => UserProfileResponseDto)
+  profile: UserProfileResponseDto;
 }

@@ -12,8 +12,10 @@ import { CreateUserDto } from '@requestable-dto/user/create-user.dto';
 import { UserCredentialService } from './user-credential.service';
 import { ResetPasswordDto } from '@requestable-dto/auth/reset-password.dto';
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
-import { createMap, Mapper } from '@automapper/core';
+import { createMap, forMember, mapFrom, Mapper } from '@automapper/core';
 import { LoginResponseDto } from '@transferable-dto/auth/login.response.dto';
+import { UserProfileResponseDto } from '@transferable-dto/user/profile/user-profile.response.dto';
+import { UserProfile } from '@modules/user/entities/user-profile.entity';
 
 export interface JwtPayload {
   sub: string;
@@ -34,7 +36,21 @@ export class AuthService extends AutomapperProfile {
 
   override get profile() {
     return (mapper: Mapper) => {
-      createMap(mapper, User, LoginResponseDto);
+      createMap(mapper, UserProfile, UserProfileResponseDto);
+
+      createMap(
+        mapper,
+        User,
+        LoginResponseDto,
+        forMember(
+          (dest) => dest.profile,
+          mapFrom((s) =>
+            s.profile
+              ? mapper.map(s.profile, UserProfile, UserProfileResponseDto)
+              : null,
+          ),
+        ),
+      );
     };
   }
 
@@ -67,7 +83,7 @@ export class AuthService extends AutomapperProfile {
     const { email, password } = payload;
 
     // Find user by email
-    const user = await this.userService.findByEmail(email);
+    const user = await this.userService.findByEmail(email, true);
 
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');

@@ -89,10 +89,15 @@ export class UserService extends AutomapperProfile {
     return user;
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    return this.userRepository.findOne({
-      where: { email: email.toLowerCase().trim() },
+  async findByEmail(email: string, loadRelations = false): Promise<any> {
+    const user = await this.userRepository.findOne({
+      where: {
+        email: email.toLowerCase().trim(),
+      },
+      relations: loadRelations ? ['profile'] : undefined,
     });
+
+    return user;
   }
 
   async create(payload: CreateUserDto) {
