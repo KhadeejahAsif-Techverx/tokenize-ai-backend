@@ -105,7 +105,7 @@ export class UserService extends AutomapperProfile {
 
     const existingUser = await this.findByEmail(email);
     if (existingUser) {
-      throw new ConflictException(`User with email ${email} already exists`);
+      throw new ConflictException(`User with email ${email} already exists, please choose a different email. `);
     }
 
     let hashedPassword: string = '';
