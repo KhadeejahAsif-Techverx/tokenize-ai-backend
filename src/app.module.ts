@@ -10,6 +10,7 @@ import AuthModule from '@modules/auth/auth.module';
 import { classes } from '@automapper/classes';
 import { AutomapperModule } from '@automapper/nestjs';
 import { PatentModule } from '@modules/patent/patent.module';
+import { WalletModule } from '@modules/wallet/wallet.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { PatentModule } from '@modules/patent/patent.module';
     UserModule,
     AuthModule,
     PatentModule,
+    WalletModule,
   ],
   controllers: [],
   providers: [],

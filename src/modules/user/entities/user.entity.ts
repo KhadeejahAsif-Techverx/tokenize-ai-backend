@@ -1,10 +1,11 @@
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { UserProfile } from './user-profile.entity';
 import CustomBaseEntity from '@base-classes/base.entity';
 import { UserCredential } from '@modules/auth/entities/user-credential.entity';
 import { AutoMap } from '@automapper/classes';
 import { UserProfileResponseDto } from '@transferable-dto/user/profile/user-profile.response.dto';
 import { UserKYCStatusEnum } from '@enums/user/user.enum';
+import { UserWallet } from './user-wallet.entity';
 
 @Entity('users')
 export class User extends CustomBaseEntity {
@@ -56,4 +57,7 @@ export class User extends CustomBaseEntity {
   @Column({ type: 'boolean', default: false })
   @AutoMap()
   emailVerified: boolean;
+
+  @OneToMany(() => UserWallet, (wallet) => wallet.user)
+  wallets: UserWallet[];
 }
