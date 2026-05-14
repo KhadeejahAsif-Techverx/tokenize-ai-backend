@@ -18,7 +18,7 @@ export class UserReferral extends CustomBaseEntity {
   @ManyToOne(() => User, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'referredUserId' })
+  @JoinColumn({ name: 'referred_user_id' })
   referredUser: User;
 
   /**
@@ -34,7 +34,7 @@ export class UserReferral extends CustomBaseEntity {
   @ManyToOne(() => User, (user) => user.sentReferrals, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'referredByUserId' })
+  @JoinColumn({ name: 'referred_by_user_id' })
   referredByUser: User;
 
   /**
