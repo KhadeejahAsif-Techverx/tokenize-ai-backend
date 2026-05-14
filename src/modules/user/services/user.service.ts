@@ -18,6 +18,7 @@ import { UserProfile } from '../entities/user-profile.entity';
 import { UserProfileResponseDto } from '@transferable-dto/user/profile/user-profile.response.dto';
 import { welcomeEmailTemplate } from '@email-templates/welcome-email.template';
 import { EmailService } from '@modules/app-shared/services/email.service';
+import { UserReferralService } from './user-referrals.service';
 
 @Injectable()
 export class UserService extends AutomapperProfile {
@@ -28,6 +29,8 @@ export class UserService extends AutomapperProfile {
     private readonly userRepository: Repository<User>,
 
     private readonly emailService: EmailService,
+
+    private readonly userReferralService: UserReferralService,
   ) {
     super(mapper);
   }
@@ -104,8 +107,14 @@ export class UserService extends AutomapperProfile {
     return user;
   }
 
+  async findByReferralCode(referralCode: string) {
+    return await this.userRepository.findOne({
+      where: { referralCode },
+    });
+  }
+
   async create(payload: CreateUserDto) {
-    const { email, password } = payload;
+    const { email, password, referralCode } = payload;
 
     const existingUser = await this.findByEmail(email);
     if (existingUser) {
@@ -121,17 +130,49 @@ export class UserService extends AutomapperProfile {
       hashedPassword = await this.hashPassword(password);
     }
 
+    /**
+     * Step 1: Prepare referral (if provided)
+     */
+    let referrerUser: User | null = null;
+
+    if (referralCode) {
+      referrerUser = await this.findByReferralCode(referralCode);
+
+      if (!referrerUser) {
+        throw new ConflictException('Invalid referral code.');
+      }
+    }
+
+    /**
+     * Step 2: Create user
+     */
+
     const user = this.userRepository.create({
       email,
       password: hashedPassword,
+      referredByUserId: referrerUser ? referrerUser.id : null,
     });
+
+    const savedUser = await this.userRepository.save(user);
+
+    /**
+     * Step 3: Create referral record (if applicable)
+     */
+    if (referrerUser) {
+      await this.userReferralService.assignReferral({
+        referredUserId: savedUser.id,
+        referredByUserId: referrerUser.id,
+      });
+    }
+
+    /**
+     * Step 4: Send welcome email
+     */
 
     // prepare email template
     const html = welcomeEmailTemplate({
       loginPageLink: `${process.env.FRONTEND_URL}/login`,
     });
-
-    const savedUser = await this.userRepository.save(user);
 
     await this.emailService.sendMail({
       subject: 'Welcome to Tokenize AI',

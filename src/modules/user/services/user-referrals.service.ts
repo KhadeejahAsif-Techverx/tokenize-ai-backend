@@ -27,4 +27,23 @@ export class UserReferralService {
       },
     );
   }
+
+  async assignReferral(payload: {
+    referredUserId: string;
+    referredByUserId: string;
+  }) {
+    const { referredByUserId, referredUserId } = payload;
+
+    const exists = await this.userReferralRepo.findOne({
+      where: { referredUserId },
+    });
+
+    if (exists) return exists;
+
+    return await this.userReferralRepo.save({
+      referredUserId,
+      referredByUserId,
+      isQualified: false,
+    });
+  }
 }

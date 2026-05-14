@@ -1,6 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { EmailDto } from '@requestable-dto/common/email.dto';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateUserDto extends EmailDto {
   @ApiProperty({
@@ -10,4 +10,12 @@ export class CreateUserDto extends EmailDto {
   @IsString()
   @IsNotEmpty()
   password: string;
+
+  @ApiPropertyOptional({
+    description: 'Referral Code (If available)',
+    type: String,
+  })
+  @IsOptional()
+  @IsString()
+  referralCode?: string;
 }
