@@ -16,6 +16,8 @@ import { createMap, forMember, mapFrom, Mapper } from '@automapper/core';
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { UserProfile } from '../entities/user-profile.entity';
 import { UserProfileResponseDto } from '@transferable-dto/user/profile/user-profile.response.dto';
+import { welcomeEmailTemplate } from '@email-templates/welcome-email.template';
+import { EmailService } from '@modules/app-shared/services/email.service';
 
 @Injectable()
 export class UserService extends AutomapperProfile {
@@ -24,6 +26,8 @@ export class UserService extends AutomapperProfile {
 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+
+    private readonly emailService: EmailService,
   ) {
     super(mapper);
   }
@@ -105,7 +109,9 @@ export class UserService extends AutomapperProfile {
 
     const existingUser = await this.findByEmail(email);
     if (existingUser) {
-      throw new ConflictException(`User with email ${email} already exists, please choose a different email. `);
+      throw new ConflictException(
+        `User with email ${email} already exists, please choose a different email. `,
+      );
     }
 
     let hashedPassword: string = '';
@@ -120,7 +126,20 @@ export class UserService extends AutomapperProfile {
       password: hashedPassword,
     });
 
-    return this.userRepository.save(user);
+    // prepare email template
+    const html = welcomeEmailTemplate({
+      loginPageLink: `${process.env.FRONTEND_URL}/login`,
+    });
+
+    const savedUser = await this.userRepository.save(user);
+
+    await this.emailService.sendMail({
+      subject: 'Welcome to Tokenize AI',
+      html,
+      to: savedUser.email,
+    });
+
+    return savedUser;
   }
 
   async updatePassword(userId: string, password: string) {
