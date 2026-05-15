@@ -1,10 +1,18 @@
-import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+} from 'typeorm';
 import { UserProfile } from './user-profile.entity';
 import CustomBaseEntity from '@base-classes/base.entity';
 import { UserCredential } from '@modules/auth/entities/user-credential.entity';
 import { AutoMap } from '@automapper/classes';
 import { UserProfileResponseDto } from '@transferable-dto/user/profile/user-profile.response.dto';
 import { UserKYCStatusEnum } from '@enums/user/user.enum';
+import { UserReferral } from './user-referrals.entity';
 import { UserWallet } from './user-wallet.entity';
 
 @Entity('users')
@@ -57,6 +65,45 @@ export class User extends CustomBaseEntity {
   @Column({ type: 'boolean', default: false })
   @AutoMap()
   emailVerified: boolean;
+
+  /**
+   * Unique referral code owned by this user.
+   * Used in signup links like: ?ref=ABC123
+   */
+  @Column({
+    type: 'varchar',
+    unique: true,
+    nullable: true,
+    default: null,
+    length: 20,
+  })
+  @AutoMap()
+  referralCode: string;
+
+  /**
+   * User ID of the person who referred this user.
+   * Null if user signed up organically.
+   *
+   * This is used for fast lookup (single-level referral).
+   */
+  @Column({ type: 'uuid', nullable: true, default: null })
+  @AutoMap()
+  referredByUserId: string | null;
+
+  /**
+   * Relation → Referrer (who invited this user)
+   */
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'referred_by_userId' })
+  referredBy: User;
+
+  /**
+   * Referrals made by this user (people they invited)
+   * Back-reference from referral table
+   */
+
+  @OneToMany(() => UserReferral, (ref) => ref.referredByUser)
+  sentReferrals: UserReferral[];
 
   @OneToMany(() => UserWallet, (wallet) => wallet.user)
   wallets: UserWallet[];

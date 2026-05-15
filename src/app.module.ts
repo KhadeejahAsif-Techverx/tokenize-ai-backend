@@ -10,6 +10,7 @@ import AuthModule from '@modules/auth/auth.module';
 import { classes } from '@automapper/classes';
 import { AutomapperModule } from '@automapper/nestjs';
 import { PatentModule } from '@modules/patent/patent.module';
+import AppSharedModule from '@modules/app-shared/app-shared.module';
 import { WalletModule } from '@modules/wallet/wallet.module';
 
 @Module({
@@ -42,6 +43,7 @@ import { WalletModule } from '@modules/wallet/wallet.module';
     UserModule,
     AuthModule,
     PatentModule,
+    AppSharedModule,
     WalletModule,
   ],
   controllers: [],
