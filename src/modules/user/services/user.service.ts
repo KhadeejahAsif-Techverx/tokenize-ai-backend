@@ -178,7 +178,6 @@ export class UserService extends AutomapperProfile {
       email,
       password: hashedPassword,
       referralCode: userReferralCode,
-      referredByUserId: referrerUser ? referrerUser.id : null,
     });
 
     const savedUser = await this.userRepository.save(user);

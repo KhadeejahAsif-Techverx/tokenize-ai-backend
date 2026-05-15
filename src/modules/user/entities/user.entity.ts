@@ -1,11 +1,4 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { UserProfile } from './user-profile.entity';
 import CustomBaseEntity from '@base-classes/base.entity';
 import { UserCredential } from '@modules/auth/entities/user-credential.entity';
@@ -80,27 +73,10 @@ export class User extends CustomBaseEntity {
   referralCode: string;
 
   /**
-   * User ID of the person who referred this user.
-   * Null if user signed up organically.
-   *
-   * This is used for fast lookup (single-level referral).
-   */
-  @Column({ type: 'uuid', nullable: true, default: null })
-  @AutoMap()
-  referredByUserId: string | null;
-
-  /**
-   * Relation → Referrer (who invited this user)
-   */
-  @ManyToOne(() => User, { nullable: true })
-  @JoinColumn({ name: 'referred_by_userId' })
-  referredBy: User;
-
-  /**
    * Referrals made by this user (people they invited)
    * Back-reference from referral table
    */
 
   @OneToMany(() => UserReferral, (ref) => ref.referredByUser)
-  sentReferrals: UserReferral[];
+  referrals: UserReferral[];
 }
