@@ -2,6 +2,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { Repository } from 'typeorm';
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -77,6 +78,25 @@ export class UserService extends AutomapperProfile {
     return bcrypt.compare(password, hashedPassword);
   }
 
+  private async generateUniqueReferralCode(): Promise<string> {
+    let code: string;
+    let exists: User | null;
+
+    do {
+      const prefix = 'INV';
+      const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+      const timestamp = Date.now().toString().slice(-4);
+
+      code = `${prefix}-${random}${timestamp}`;
+
+      exists = await this.findByReferralCode(code);
+    } while (exists);
+
+    // Example Output : INV-X7K9QD4821, INV-A1B2C33901
+    return code;
+  }
+
   async findById(id: string, loadRelations = false) {
     const user = await this.userRepository.findOne({
       where: { id },
@@ -142,14 +162,21 @@ export class UserService extends AutomapperProfile {
       }
     }
 
+    // user could pass own referralCode
+    if (referrerUser && referrerUser.email === email) {
+      throw new BadRequestException('Self-referral is not allowed.');
+    }
+
     /**
      * Step 2: Create user
      */
 
+    const userReferralCode = await this.generateUniqueReferralCode();
+
     const user = this.userRepository.create({
       email,
       password: hashedPassword,
-      referredByUserId: referrerUser ? referrerUser.id : null,
+      referralCode: userReferralCode,
     });
 
     const savedUser = await this.userRepository.save(user);
