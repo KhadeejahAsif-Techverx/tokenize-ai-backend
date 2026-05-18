@@ -16,16 +16,10 @@ import { createMap, forMember, mapFrom, Mapper } from '@automapper/core';
 import { LoginResponseDto } from '@transferable-dto/auth/login.response.dto';
 import { UserProfileResponseDto } from '@transferable-dto/user/profile/user-profile.response.dto';
 import { UserProfile } from '@modules/user/entities/user-profile.entity';
-import { UserRoleEnum } from '@enums/user/user.enum';
 
 export interface JwtPayload {
   sub: string;
   email: string;
-  role: UserRoleEnum;
-}
-
-export interface LoginOptions {
-  allowedRoles?: UserRoleEnum[];
 }
 
 @Injectable()
@@ -85,12 +79,8 @@ export class AuthService extends AutomapperProfile {
     return await this.userService.create(payload);
   }
 
-  async login(
-    payload: LoginDto,
-    options: LoginOptions = { allowedRoles: [UserRoleEnum.USER] },
-  ): Promise<any> {
+  async login(payload: LoginDto): Promise<any> {
     const { email, password } = payload;
-    const allowedRoles = options.allowedRoles ?? [UserRoleEnum.USER];
 
     // Find user by email
     const user = await this.userService.findByEmail(email, true);
@@ -109,10 +99,6 @@ export class AuthService extends AutomapperProfile {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    if (!allowedRoles.includes(user.role)) {
-      throw new UnauthorizedException('Invalid email or password');
-    }
-
     if (user.isActive === false) {
       throw new UnauthorizedException(
         'User account is inactive, please contact admin to activate your account',
@@ -123,7 +109,6 @@ export class AuthService extends AutomapperProfile {
     const jwtPayload: JwtPayload = {
       sub: user.id,
       email: user.email,
-      role: user.role,
     };
 
     // Order: (source, SourceClass, DestinationClass)

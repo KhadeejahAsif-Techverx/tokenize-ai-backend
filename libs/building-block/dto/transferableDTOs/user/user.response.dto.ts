@@ -1,5 +1,4 @@
 import { AutoMap } from '@automapper/classes';
-import { UserRoleEnum } from '@enums/user/user.enum';
 import { UserProfileResponseDto } from './profile/user-profile.response.dto';
 
 export class UserResponseDto {
@@ -8,9 +7,6 @@ export class UserResponseDto {
 
   @AutoMap()
   email: string;
-
-  @AutoMap()
-  role: UserRoleEnum;
 
   @AutoMap()
   isActive: boolean;
