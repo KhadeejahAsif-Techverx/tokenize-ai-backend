@@ -57,7 +57,9 @@ export class WalletController {
     description:
       'Returns blockchain-oriented public info for a wallet known to the system (placeholder until RPC integration).',
   })
-  async getByAddress(@Param('address') address: string): Promise<WalletResponseDto> {
+  async getByAddress(
+    @Param('address') address: string,
+  ): Promise<WalletResponseDto> {
     return this.walletService.getPublicInfoByAddress(address);
   }
 }
