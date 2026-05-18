@@ -3,3 +3,8 @@ export enum UserKYCStatusEnum {
   VERIFIED = 'verified',
   REJECTED = 'rejected',
 }
+
+export enum UserRoleEnum {
+  USER = 'user',
+  ADMIN = 'admin',
+}

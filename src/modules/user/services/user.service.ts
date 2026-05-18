@@ -19,6 +19,7 @@ import { UserProfileResponseDto } from '@transferable-dto/user/profile/user-prof
 import { welcomeEmailTemplate } from '@email-templates/welcome-email.template';
 import { EmailService } from '@modules/app-shared/services/email.service';
 import { UserReferralService } from './user-referrals.service';
+import { UserRoleEnum } from '@enums/user/user.enum';
 
 @Injectable()
 export class UserService extends AutomapperProfile {
@@ -150,6 +151,7 @@ export class UserService extends AutomapperProfile {
     const user = this.userRepository.create({
       email,
       password: hashedPassword,
+      role: UserRoleEnum.USER,
       referredByUserId: referrerUser ? referrerUser.id : null,
     });
 

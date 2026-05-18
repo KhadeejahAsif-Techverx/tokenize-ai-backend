@@ -11,7 +11,7 @@ import CustomBaseEntity from '@base-classes/base.entity';
 import { UserCredential } from '@modules/auth/entities/user-credential.entity';
 import { AutoMap } from '@automapper/classes';
 import { UserProfileResponseDto } from '@transferable-dto/user/profile/user-profile.response.dto';
-import { UserKYCStatusEnum } from '@enums/user/user.enum';
+import { UserKYCStatusEnum, UserRoleEnum } from '@enums/user/user.enum';
 import { UserReferral } from './user-referrals.entity';
 import { UserWallet } from './user-wallet.entity';
 
@@ -41,6 +41,14 @@ export class User extends CustomBaseEntity {
   })
   @AutoMap()
   kycStatus: UserKYCStatusEnum;
+
+  @Column({
+    type: 'enum',
+    enum: UserRoleEnum,
+    default: UserRoleEnum.USER,
+  })
+  @AutoMap()
+  role: UserRoleEnum;
 
   @OneToOne(() => UserProfile, (profile) => profile.user, {
     eager: false,
